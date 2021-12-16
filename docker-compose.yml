@@ -1,0 +1,61 @@
+version: "3.4"
+
+services:
+ 
+  vsftpd:
+    container_name: vsftpd
+    image: panubo/vsftpd
+    environment:
+      - FTP_USER=pablo
+      - FTP_PASSWORD=pablo
+    volumes:
+      - ./docker/vsftpd:/srv
+    expose:
+      - 22
+    ports:
+      - 22:22
+
+  phpapache:
+    container_name: phpapache
+    restart: always
+    image: php:apache
+    volumes:
+      - ./docker/paginaweb/:/var/www/html
+    expose:
+      - 80
+    ports:
+      - 81:80
+    links:
+      - mariadb
+
+  mariadb:
+    container_name: mariadb
+    restart: always
+    image: mariadb:latest
+    environment:
+      - MYSQL_ROOT_PASSWORD=pablo
+    volumes:
+      - ./docker/mariadb:/var/lib/mysql
+    expose:
+      - 3306
+    ports:
+      - 3306:3306
+
+  phpmyadmin:
+    container_name: phpmyadmin
+    image: phpmyadmin/phpmyadmin:latest
+    ports:
+      - 8080:80
+    links:
+      - mariadb:db
+
+  poste:
+    container_name: poste
+    restart: always
+    image: analogic/poste.io
+    network_mode: "host"
+    volumes: 
+      - ./docker/correo-poste:/data
+    environment: 
+      - HTTPS=ON
+    
